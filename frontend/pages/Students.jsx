@@ -30,7 +30,9 @@ const Students = ()=> {
   const [showInterpretation, setShowInterpretation] = useState(false);
 
   // states pour la fonction d'explication
-  const [explanation, setExplanation]=useState(null)
+  const [explanation, setExplanation] = useState(null);
+  const [semanticCauses, setSemanticCauses] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
   const [showModal, setShowModal] = useState(false)
 
   // tous les filtres possibles
@@ -178,14 +180,23 @@ const Students = ()=> {
         
       
     );
-    console.log(response.data);
+    
     const sortedFeatures = [...response.data.top_features]
     .sort(
       (a, b) =>
         Math.abs(b.value) - Math.abs(a.value)
     );
 
+    console.log(response.data);
+
     setExplanation(sortedFeatures);
+    setSemanticCauses(
+      response.data.semantic_causes || []
+    );
+
+    setRecommendations(
+      response.data.recommendations || []
+    );
 
     setShowModal(true);
 
@@ -527,49 +538,96 @@ const Students = ()=> {
                       </button>
                     </div>
 
-                  { showInterpretation && (<div className="ai-summary">
+                    {
+                    showInterpretation && (
 
-                    <h4>
-                      🤖 Interprétation automatique
-                    </h4>
+                    <div className="ai-summary">
 
-                    <p>
+                      <h4>
+                        🎯 Diagnostic pédagogique
+                      </h4>
 
-                      Les facteurs qui augmentent
-                      le risque sont principalement :
+                      <p>
 
-                      <strong>
-                        {" "}
+                        Les domaines qui influencent
+                        principalement le risque de cet
+                        élève sont :
+
+                      </p>
+
+                      <div className="causes-grid">
+
                         {
-                          positiveFactors
-                            .map(f => f.feature)
-                            .join(", ")
+                          semanticCauses.map(
+                            cause => (
+
+                              <div
+                                key={cause.category}
+                                className={
+                                  cause.value > 0
+                                  ? "cause-risk"
+                                  : "cause-strength"
+                                }
+                              >
+
+                                <h5>
+                                  {cause.category}
+                                </h5>
+
+                                <span>
+
+                                  {
+                                    cause.value > 0
+
+                                    ? "⚠️ Facteur de risque"
+
+                                    : "✅ Point fort"
+
+                                  }
+
+                                </span>
+
+                              </div>
+
+                            )
+                          )
                         }
-                      </strong>
 
-                      .
+                        
 
-                    </p>
+                      </div>
+                  {
+                      recommendations.length > 0 && (
 
-                    <p>
+                      <div className="recommendations">
 
-                      Les facteurs qui réduisent
-                      le risque sont principalement :
+                        <h4>
+                          📋 Recommandations pédagogiques
+                        </h4>
 
-                      <strong>
-                        {" "}
-                        {
-                          negativeFactors
-                            .map(f => f.feature)
-                            .join(", ")
-                        }
-                      </strong>
+                        <ul>
 
-                      .
+                          {
+                            recommendations.map(
+                              (rec,index) => (
 
-                    </p>
+                                <li key={index}>
+                                  {rec}
+                                </li>
 
-                  </div> ) }
+                              )
+                            )
+                          }
+
+                        </ul>
+
+                      </div>
+
+                      )}
+
+                    </div>
+
+                    )}
 
                   <button
                     className="btn"

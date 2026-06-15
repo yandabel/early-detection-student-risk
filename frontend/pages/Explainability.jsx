@@ -20,6 +20,11 @@ const Explainability = () => {
 const [students, setStudents] = useState([]);
 const [selectedStudent, setSelectedStudent] = useState("");
 const [explanation, setExplanation] = useState(null);
+const [semanticCauses, setSemanticCauses] = useState([]);
+
+
+const [recommendations, setRecommendations] = useState([]);
+
 const [loading, setLoading] = useState(false);
 
 useEffect(() => {
@@ -82,10 +87,18 @@ try {
           Math.abs(a.value)
       );
 
-  setExplanation({
+setExplanation({
     student,
     features: sortedFeatures
   });
+
+  setSemanticCauses(
+    response.data.semantic_causes || []
+  );
+
+  setRecommendations(
+    response.data.recommendations || []
+  );
 
 } catch (error) {
 
@@ -305,51 +318,133 @@ return (
 
         </div>
 
-        <div className="ai-summary">
+        <div className="diagnostic-card">
 
-          <h2>
-            🤖 Interprétation automatique
-          </h2>
+        <h2>
+          🎯 Diagnostic pédagogique
+        </h2>
 
-          <p>
+        <div className="causes-grid">
 
-            Les facteurs qui
-            augmentent principalement
-            le risque sont :
+          {
+            semanticCauses.map(
+              (cause,index) => (
 
-            <strong>
-              {" "}
-              {
-                positiveFactors
-                  .map(
-                    f => f.feature
-                  )
-                  .join(", ")
-              }
-            </strong>
+                <div
+                  key={index}
+                  className={
+                    cause.value > 0
+                    ? "cause-risk"
+                    : "cause-strength"
+                  }
+                >
 
-          </p>
+                  <h3>
+                    {cause.category}
+                  </h3>
 
-          <p>
+                  <p>
 
-            Les facteurs qui
-            réduisent principalement
-            le risque sont :
+                    {
+                      cause.value > 0
 
-            <strong>
-              {" "}
-              {
-                negativeFactors
-                  .map(
-                    f => f.feature
-                  )
-                  .join(", ")
-              }
-            </strong>
+                      ? "⚠️ Domaine nécessitant une intervention"
 
-          </p>
+                      : "✅ Domaine relativement maîtrisé"
+
+                    }
+
+                  </p>
+
+                </div>
+
+              )
+            )
+          }
 
         </div>
+        <div className="recommendation-card">
+
+        <h2>
+          📋 Recommandations pédagogiques
+        </h2>
+
+        <ul>
+
+          {
+            recommendations.map(
+              (rec,index) => (
+
+                <li key={index}>
+                  {rec}
+                </li>
+
+              )
+            )
+          }
+
+        </ul>
+
+      </div>
+
+      <div className="summary-card">
+
+        <h2>
+          🤖 Synthèse IA
+        </h2>
+
+        <p>
+
+          L'analyse de l'élève indique
+          un risque
+
+          <strong>
+            {" "}
+            {explanation.student.risk_label}
+            {" "}
+          </strong>
+
+          avec une probabilité de
+
+          <strong>
+            {" "}
+            {explanation.student.probability}%
+          </strong>.
+
+        </p>
+
+        <p>
+
+          Les principales difficultés
+          concernent :
+
+          <strong>
+            {" "}
+            {
+              semanticCauses
+                .filter(c => c.value > 0)
+                .slice(0,3)
+                .map(c => c.category)
+                .join(", ")
+            }
+          </strong>
+
+        </p>
+
+        <p>
+
+          Une intervention pédagogique
+          ciblée est recommandée afin
+          d'améliorer les performances
+          de l'élève.
+
+        </p>
+
+      </div>
+
+      </div>
+
+        
 
       </>
 
