@@ -11,7 +11,10 @@ Cette application utilise l'intelligence artificielle pour détecter précocemen
 - XGBoost
 - SHAP
 - Recharts
+- Python
 - Pandas
+- Numpy
+- MatplotLib
 
 ## Fonctionnalités
 
